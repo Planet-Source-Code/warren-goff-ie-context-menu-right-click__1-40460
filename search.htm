@@ -1,0 +1,196 @@
+<script language = "JavaScript">
+//
+// License: 
+// This document, (search.htm), is Free, (in both the "beer" and "speech" sense).
+// The original can be found here: http://www.jfitz.com. You may use, distribute,
+// or modify this document, any way you see fit, commercially or otherwise, 
+// provided this License, and the following Copyright statement are reproduced
+// unaltered at the top of the redistributed or modified file. This document is
+// supplied WITHOUT ANY WARRANTY WHATSOEVER. Use it at your own risk.
+//
+// Copyright (c) John Fitzgibbon 2002. All rights reserved.
+//
+// Purpose: 
+//	When invoked from a context menu in Internet Explorer, this document
+//	opens a new window to perform a Google search for a highlighted text
+//	selection, or for a URL. When opened without a browser context, the
+//	instructions on how to edit the registry to add a context menu item
+//	are displayed.
+//	By default, the JavaScript code uses Google to perform the search.
+//	This can be modified to use any of the more popular search engines,
+//	by modifying the search strings at the beginning of the code.
+//
+
+//
+// sEngine is the search URL used. The search text is appended to the end of this URL.
+// sEnd holds any text required after the search text is added to the URL.
+//
+// You can customize these strings by manually executing a search, then copying the 
+// appropriate pieces from the URL that appears in the address bar of your browser.
+//
+var sEngine = "http://www.google.com/search?hl=en&ie=UTF8&oe=UTF8&q=";
+var sEnd = "";
+
+//
+// Here's a sample of what the strings for AltaVista might look like:
+//
+// var sEngine = "http://www.altavista.com/sites/search/web?q=";
+// var sEnd = "&pg=q&kl=XX";
+//
+
+var oWindow = window.external.menuArguments;			// Get the window where the context menu was opened.
+if (oWindow != null)						// Check that we were invoked from a context menu.
+{
+	var oDocument = oWindow.document;			// Get the document object exposed through oWindow.
+	var sText = null;					// The search text
+
+	//
+	// First, Check to see if we were invoked to search for info about a hyperlink,
+	// (i.e. the cursor is hovering over a link of some sort.)
+	//
+	var oEvent = oWindow.event;				// Get the event object from oWindow
+	if (oEvent.type=="MenuExtUnknown" || oEvent.type=="MenuExtImage" || oEvent.type=="MenuExtAnchor")
+	{
+		var oElement = oDocument.elementFromPoint(oEvent.clientX, oEvent.clientY);
+		var oAnchor = oElement;
+		while(oAnchor.tagName!="A" && oAnchor.tagName!="AREA" && oAnchor.tagName!="HTML") 
+		{
+			oAnchor=oAnchor.parentElement;
+		}
+		if (oAnchor.tagName=="A" || oAnchor.tagName=="AREA") 
+		{
+			sText = oAnchor.href;
+		}
+		else if (oAnchor.tagName=="HTML" && oElement.tagName=="IMG") 
+		{
+			sText = oElement.src;
+		}
+	}
+
+	//
+	// If a link is not selected, see if some text has been highlighted.
+	//
+	if ((sText == null) || (sText.length == 0))
+	{
+		var oSelect = oDocument.selection;		// Get the selection from oDocument.
+		var oSelectRange = oSelect.createRange();	// Create a TextRange from oSelect.
+		sText = oSelectRange.text;			// Get the text of the selection.
+	}
+
+	//
+	// If we have any search text, trim spaces from the start and end,
+	// then replace any internal spaces with '+' characters.
+	//
+	if ((sText != null) && (sText.length != 0))
+	{
+		var start = 0;
+		while ((start < sText.length) && (sText.charAt(start) == ' '))
+		{
+			start++;
+		}
+		var end = sText.length - 1;
+		while ((end > 0) && (sText.charAt(end) == ' '))
+		{
+			end--;
+		}
+		sText = sText.substring(start,end+1);
+		while (sText.indexOf(' ') > -1)
+		{
+			sText = sText.replace(' ','+');
+		}
+	}
+
+	//
+	// If we have any search text left at this point, search for it.
+	//
+	if ((sText != null) && (sText.length != 0))
+	{
+		open(sEngine + sText + sEnd);
+	}
+	else
+	{
+		alert("Please select some text, or right-click a link, before selecting the Search option.");
+	}
+}
+
+</script>
+
+<html>
+<body>
+<font face="Verdana,Arial" size=-1>
+
+<h2>search.htm - Search from IE's right-click menu</h2>
+<hr><h2>License</h2>
+This document, (search.htm), is Free, (in both the "beer" and "speech" sense).
+The original can be found here: <a href=http://www.jfitz.com>http://www.jfitz.com</a>.
+<p>
+You may use, distribute, or modify this document, any way you see fit, commercially or otherwise,
+provided this License, and the following Copyright statement are reproduced unaltered at the top
+of the redistributed or modified file. 
+This document is supplied WITHOUT ANY WARRANTY WHATSOEVER. Use it at your own risk.
+<p>
+Copyright (c) John Fitzgibbon 2002. All rights reserved.
+<p>
+
+<hr><h2>Purpose</h2>
+When invoked from a context menu in Internet Explorer, this document opens a new window to perform a Google search for a
+highlighted text selection, or for a URL.
+<p>
+When opened without a browser context, these instructions on how to edit the registry to add a context menu item are displayed.
+<p>
+By default, the JavaScript code in this document uses Google to perform the search. This can be modified to use any of the more
+popular search engines. To do this, edit this file and modify the search strings at the beginning of the JavaScript code.
+<p>
+
+<hr><h2>Installation</h2>
+<b>Automated Installation</b>
+<p>
+You can use this automated setup program: 
+<a href=http://www.jfitz.com/tips/search10_install.exe>http://www.jfitz.com/tips/search10_install.exe</a>
+to install this script, or you can install it manually by following the instructions below.
+<p>
+<b>Manual Installation</b>
+<ul>
+<li>	Save this document as "<b>search.htm</b>" in a folder of your choice.</li>
+<li>	Select Windows "Start", then "Run" and enter "<b>regedit</b>".<br>
+	(RegEdit allows you to edit your registry.)<br>
+	**********************************************************
+	<br><font color=#FF0000><b>
+	NOTE: Be VERY careful when using RegEdit!! Editing the wrong values<br>
+	can cause problems running Windows or other programs!!
+	</b></font><br>
+	**********************************************************</li>
+<li>	Navigate to the "Internet Explorer" key as follows:<br>
+	(Note: "keys" are the labels in RegEdit's tree list)<br>
+	<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;- HKEY_CURRENT_USER<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Software<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Microsoft<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Internet Explorer<br>
+	<br></li>
+<li>	You should see a key inside "Internet Explorer" called "MenuExt".</li>
+<li>	If not, add a new key as follows:
+	<ul>
+	<li>Right-click the "Internet Explorer" key.</li>
+	<li>Select "New", then "Key" from the menu options.</li>
+	<li>Give the key the name "<b>MenuExt</b>".</li>
+	</ul>
+<li>	Expand "MenuExt", (double-click it).</li>
+<li>	Add a new key with the name "<b>&Search</b>".<br>
+	(This string will be displayed in the browser's right-click menu.)</li>
+<li>	After adding the key, double-click the "Default" value on the right<br>
+	hand side of the RegEdit screen.</li>
+<li>	Change the Default value to the full path to the saved search.htm file.<br>
+	(e.g., "<b>c:\docs\search.htm</b>" if you saved search.htm in <b>c:\docs</b>)</li>
+<li>	Next, right-click the "&Search" key, select "New", then "DWORD Value"</li>
+<li>	Give the new "DWORD Value" the name "<b>contexts</b>".</li>
+<li>	Double-click the new "contexts" value on the right hand side,<br>
+	and change its value to "<b>7e</b>", (Hexidecimal).</li>
+<li>	Exit RegEdit and close all instances of Internet Explorer.</li>
+<li>	When you next open Internet Explorer, right-click menus should have<br>
+	a "<b>Search</b>" option. This option will open a new window and search<br>
+	for the currently highlighted text or hyperlink in Google.</li>
+</ul>
+</font>
+</body>
+</html>
